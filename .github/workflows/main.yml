@@ -1,0 +1,67 @@
+name: "Ci / CD Workflow"
+on:
+  push:
+    branches: [develop]
+
+jobs:
+  # run tests
+  runTests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Setup flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+
+      - name: Run Unit tests
+        run: |
+          flutter pub get
+          flutter analyze
+          flutter run tests --coverage
+
+  # build apk and deploy to firebase app tester
+  buildForAndroidAndDeployToFirebaseAppTester:
+    needs:
+      - runTests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build Android APK
+        uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v2
+        with:
+          distribution: "zulu"
+          java-version: "11"
+
+      - name: Setup flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "2.10.4"
+
+      - name: Build apk
+        run: |
+          flutter pub get 
+          flutter test
+          flutter build apk
+          flutter build appbundle
+
+  # deploy to firebase app tester
+  buildForIOSAndDeployToTestflight:
+    runs-on: macos-latest
+    needs:
+      - runTests
+    steps:
+      - name: Setup flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "2.10.4"
+
+      - name: Build for iOS
+        run: |
+          flutter pub get
+          flutter test
+          flutter build ios --release --no-codesign

@@ -1,7 +1,6 @@
 name: "Ci / CD Workflow"
 on:
   push:
-    branches: [develop]
 
 jobs:
   # run tests

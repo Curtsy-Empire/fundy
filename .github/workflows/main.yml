@@ -20,10 +20,12 @@ jobs:
         run: |
           flutter pub get
           flutter analyze
-          flutter run tests --coverage
+          flutter test --coverage test/
 
   # build apk and deploy to firebase app tester
   buildForAndroidAndDeployToFirebaseAppTester:
+    # only on develop branch
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
     needs:
       - runTests
     runs-on: ubuntu-latest
@@ -51,10 +53,15 @@ jobs:
 
   # deploy to firebase app tester
   buildForIOSAndDeployToTestflight:
+    # only on develop branch
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
     runs-on: macos-latest
     needs:
       - runTests
     steps:
+      - name: Build Android APK
+        uses: actions/checkout@v3
+
       - name: Setup flutter
         uses: subosito/flutter-action@v2
         with:

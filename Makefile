@@ -30,6 +30,3 @@ test-file:
     lcov --remove coverage/lcov.info 'lib/**/*.gr.dart' -o coverage/lcov.info && \
     genhtml -q -o coverage coverage/lcov.info && \
 	google-chrome coverage/index.html
-
-
-
